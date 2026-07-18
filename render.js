@@ -1,0 +1,1 @@
+var ctx = document.getElementsByTagName("canvas")[0].getContext("2d");  // 画布对象
