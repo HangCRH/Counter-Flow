@@ -1,8 +1,13 @@
+/**
+ * 游戏主控制类，管理所有游戏状态与逻辑。
+ * **所有**关于游戏信息的对象、变量、操作都在这里访问。
+ * @class
+ */
 class GameBoardClass {
     /**
-     * 创建游戏主对象，**所有**关于游戏信息的对象、变量、操作在这里访问
-     * @param {number} width 游戏画布宽度
-     * @param {number} height 游戏画布高度
+     * 创建游戏主对象
+     * @param {number} width 游戏画布宽度（单位：px）
+     * @param {number} height 游戏画布高度（单位：px）
      */
     constructor(width, height) {
         this.width = width;
@@ -14,10 +19,10 @@ class GameBoardClass {
         gameRender.setSize(width, height)
     }
     /**
-     * 创建一个玩家
+     * 创建一个玩家并加入玩家列表
      * @param {number} id 玩家ID
-     * @param {string} type 玩家类型，可以是user或AI
-     * @param {string} color 玩家军队与城市颜色
+     * @param {string} type 玩家类型，可以是 `"user"` 或 `"AI"`
+     * @param {string|null} color 玩家军队与城市颜色（CSS 颜色字符串），为 `null` 时自动生成
      * @param {number} recoveryMultiplier 玩家所拥有的城市的兵力回复乘区
      */
     createPlayer(id, type, color = null, recoveryMultiplier = 1.0) {
@@ -29,14 +34,15 @@ class GameBoardClass {
         this.players.push(new Player(id, type, color, recoveryMultiplier));
     }
     /**
-     * 创建一个正方形的城市
+     * 创建一个正方形城市并加入城市列表。
+     * 若未提供坐标则自动随机生成位置，最多尝试 5 次以避免与其他城市重叠。
      * @param {number} id 城市ID
-     * @param {number|null} x 城市左上角x坐标，单位：px，填null表示自动生成
-     * @param {number|null} y 城市左上角y坐标，单位：px，填null表示自动生成
-     * @param {number} size 城市大小，单位：px
-     * @param {number|null} owner 拥有这个城市的玩家ID
+     * @param {number|null} x 城市左上角 x 坐标（单位：px），为 `null` 时自动生成
+     * @param {number|null} y 城市左上角 y 坐标（单位：px），为 `null` 时自动生成
+     * @param {number} size 城市边长大小（单位：px）
+     * @param {number|null} owner 拥有该城市的玩家 ID，`null` 表示中立
      * @param {number} troops 城市当前的兵力
-     * @param {number} baseGrowth 城市兵力回复基数，单位：个/秒
+     * @param {number} baseGrowth 城市兵力回复基数（单位：个/秒）
      */
     createCity(id, x = null, y = null, size = 50, owner = null, troops = 50, baseGrowth = 2) {
         // 如果没有提供x、y则自动生成，5次尝试生成，每次检查是否和其他城市重合，5次后放弃生成
@@ -63,41 +69,61 @@ class GameBoardClass {
     }
 }
 
+/**
+ * 玩家类，表示一个游戏参与者（用户或 AI）
+ * @class
+ */
 class Player {
     /**
-     * 玩家
-     * @param {number} id 
-     * @param {string} type 
-     * @param {string} color 
-     * @param {number} recoveryMultiplier 
+     * 创建一个玩家
+     * @param {number} id 玩家唯一标识
+     * @param {string} type 玩家类型：`"user"` 或 `"AI"`
+     * @param {string} color 玩家颜色（CSS 颜色字符串）
+     * @param {number} recoveryMultiplier 兵力回复乘区
      */
     constructor(id, type, color, recoveryMultiplier) {
+        /** @type {number} 玩家唯一标识 */
         this.id = id;
+        /** @type {string} 玩家类型 */
         this.type = type;
+        /** @type {string} 玩家颜色 */
         this.color = color;
+        /** @type {number} 兵力回复乘区 */
         this.recoveryMultiplier = recoveryMultiplier;
-        /**@type {number[]} */
+        /** @type {number[]} 该玩家拥有的城市 ID 列表 */
         this.ownCities = [];
     }
 }
 
+/**
+ * 城市类，表示地图上的一个正方形城市
+ * @class
+ */
 class City {
     /**
-     * 正方形城市
-     * @param {number} id 
-     * @param {number} x 
-     * @param {number} y 
-     * @param {number} size 
-     * @param {number|null} owner 
-     * @param {number} troops 
+     * 创建一个城市
+     * @param {number} id 城市唯一标识
+     * @param {number} x 城市左上角 x 坐标（单位：px）
+     * @param {number} y 城市左上角 y 坐标（单位：px）
+     * @param {number} size 城市边长大小（单位：px）
+     * @param {number|null} owner 拥有该城市的玩家 ID，`null` 表示中立
+     * @param {number} troops 城市初始兵力
+     * @param {number} baseGrowth 城市兵力回复基数（单位：个/秒）
      */
     constructor(id, x, y, size, owner = null, troops = 0, baseGrowth = 2) {
+        /** @type {number} 城市唯一标识 */
         this.id = id;
+        /** @type {number} 城市左上角 x 坐标 */
         this.x = x;
+        /** @type {number} 城市左上角 y 坐标 */
         this.y = y;
+        /** @type {number} 城市边长大小 */
         this.size = size;
+        /** @type {number|null} 拥有者玩家 ID */
         this.owner = owner;
+        /** @type {number} 当前兵力 */
         this.troops = troops;
+        /** @type {number} 兵力回复基数 */
         this.baseGrowth = baseGrowth;
     }
 }
