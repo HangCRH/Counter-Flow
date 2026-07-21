@@ -18,14 +18,15 @@ class GameBoardClass {
      * @param {number} id 玩家ID
      * @param {string} type 玩家类型，可以是user或AI
      * @param {string} color 玩家军队与城市颜色
+     * @param {number} recoveryMultiplier 玩家所拥有的城市的兵力回复乘区
      */
-    createPlayer(id, type, color = null) {
+    createPlayer(id, type, color = null, recoveryMultiplier = 1.0) {
         // 如果没有提供颜色则自动生成
         if (!color) {
             // 随机色相，饱和度固定 70%，明度固定 60%（避免太暗或太亮）
             color = `hsl(${parseInt(Math.random() * 360)}, 70%, 60%)`;
         }
-        this.players.push(new Player(type, color));
+        this.players.push(new Player(id, type, color, recoveryMultiplier));
     }
     /**
      * 创建一个正方形的城市
@@ -35,8 +36,9 @@ class GameBoardClass {
      * @param {number} size 城市大小，单位：px
      * @param {number|null} owner 拥有这个城市的玩家ID
      * @param {number} troops 城市当前的兵力
+     * @param {number} baseGrowth 城市兵力回复基数，单位：个/秒
      */
-    createCity(id, x = null, y = null, size = 50, owner = null, troops = 50) {
+    createCity(id, x = null, y = null, size = 50, owner = null, troops = 50, baseGrowth = 2) {
         // 如果没有提供x、y则自动生成，5次尝试生成，每次检查是否和其他城市重合，5次后放弃生成
         // 无论是否有x、y检查是否和其他城市重合，所以循环必须至少进行一次
         for (let i = 0, isOverlap = false, is; i < 5; i++, isOverlap = false) {
@@ -57,7 +59,7 @@ class GameBoardClass {
                 break;
             }
         }
-        this.cities.push(new City(id, x, y, size, owner, troops));
+        this.cities.push(new City(id, x, y, size, owner, troops, baseGrowth));
     }
 }
 
@@ -67,11 +69,13 @@ class Player {
      * @param {number} id 
      * @param {string} type 
      * @param {string} color 
+     * @param {number} recoveryMultiplier 
      */
-    constructor(id, type, color) {
+    constructor(id, type, color, recoveryMultiplier) {
         this.id = id;
         this.type = type;
         this.color = color;
+        this.recoveryMultiplier = recoveryMultiplier;
         /**@type {number[]} */
         this.ownCities = [];
     }
@@ -87,13 +91,14 @@ class City {
      * @param {number|null} owner 
      * @param {number} troops 
      */
-    constructor(id, x, y, size, owner = null, troops = 0) {
+    constructor(id, x, y, size, owner = null, troops = 0, baseGrowth = 2) {
         this.id = id;
         this.x = x;
         this.y = y;
         this.size = size;
         this.owner = owner;
         this.troops = troops;
+        this.baseGrowth = baseGrowth;
     }
 }
 
