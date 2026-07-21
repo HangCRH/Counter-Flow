@@ -47,17 +47,21 @@ class GameBoardClass {
     createCity(id, x = null, y = null, size = 50, owner = null, troops = 50, baseGrowth = 2) {
         // 如果没有提供x、y则自动生成，5次尝试生成，每次检查是否和其他城市重合，5次后放弃生成
         // 无论是否有x、y检查是否和其他城市重合，所以循环必须至少进行一次
-        for (let i = 0, isOverlap = false, is; i < 5; i++, isOverlap = false) {
-            if (!x) {
+        for (let i = 0, isOverlap = false; i < 5; i++, isOverlap = false) {
+            if (x === null) {
                 x = parseInt(Math.random() * (this.width - size));
             }
-            if (!y) {
+            if (y === null) {
                 y = parseInt(Math.random() * (this.height - size));
             }
             for (const city of this.cities) {
-                if ((city.x <= x && x <= city.x + city.size) || (city.y <= y && y <= city.y + city + size)) {
-                    // 检测不通过，标记并退出循环
+                // 矩形重叠检测：两个矩形在X轴和Y轴上都有交集才算重叠
+                if (city.x + city.size > x && x + size > city.x && city.y + city.size > y && y + size > city.y) {
+                    // 检测不通过，重置坐标并标记，下一轮重新随机生成
                     isOverlap = true;
+                    x = null;
+                    y = null;
+                    break;
                 }
             }
             //若完整遍历并没有标记则为未重叠，退出并继续生成
@@ -128,7 +132,8 @@ class City {
     }
 }
 
-var gameBoard;          // 记录地图信息（游戏信息）
+/** @type {GameBoardClass} 记录地图信息（游戏信息）*/
+var gameBoard;
 var isPlaying = false;  // 记录是否正在进行游戏
 
 function init() {
@@ -137,6 +142,7 @@ function init() {
     loadPlayers(3);
     loadCities(10);
     console.log(gameBoard);
+    gameRender.drawCities(gameBoard.cities);
 }
 
 function loadCities(citiesCnt = 0) {
