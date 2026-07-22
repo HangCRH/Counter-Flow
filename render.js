@@ -44,6 +44,7 @@ class GameRenderClass {
             } else {
                 color = "#d6d6d6";
             }
+            let troops = cityData.troops.toString();
             // 开始绘制
             this.ctx.fillStyle = color; // 设置填充颜色
             this.ctx.beginPath();   // 开始新图形的标志
@@ -51,6 +52,10 @@ class GameRenderClass {
             this.ctx.stroke();      // 绘制边框
             this.ctx.fill();        // 填充
             this.ctx.closePath();   // 此图形的结束标记
+            this.ctx.font = "35px serif"    //设置字体
+            this.ctx.textAlign = "center";
+            this.ctx.fillStyle = "#000000"; // 设置文字填充颜色
+            this.ctx.fillText(troops, x, y);
         }
     }
 }
